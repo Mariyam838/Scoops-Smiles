@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Ice Cream Cakes — Scoops & Smiles{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-icon">🎂</div>
+    <div>
+      <h1 class="page-title">Ice Cream Cakes</h1>
+      <p class="page-sub">{{ products|length }} celebration cakes · Customisable sizes · 24h order</p>
+    </div>
+  </div>
+</div>
+
+<div class="cat-page-wrap">
+  <div class="section-inner">
+    <!-- Cake info banner -->
+    <div class="cake-banner">
+      <div class="cake-banner-icon">🎂</div>
+      <div>
+        <strong>Order custom cakes 24 hours in advance.</strong>
+        All cakes are made fresh and can be personalised with a message. Contact us for special designs.
+      </div>
+    </div>
+
+    <div class="products-grid products-grid-lg">
+      {% for p in products %}
+      <div class="product-card cake-card">
+        <div class="product-img-wrap">
+          <img src="{{ p.img }}" alt="{{ p.name }}" class="product-img"
+               onerror="this.parentElement.innerHTML='<div class=product-img-fb>🎂</div>'">
+          <div class="product-price-badge">From AED {{ "%.2f"|format(p.price) }}</div>
+        </div>
+        <div class="product-body">
+          <div class="product-name">{{ p.name }}</div>
+          <div class="product-desc">{{ p.desc }}</div>
+
+          <!-- Size selector -->
+          <div class="size-selector">
+            <div class="size-label">📏 Select Size:</div>
+            <div class="size-btns" id="sizes-{{ p.id }}">
+              {% for size in p.sizes %}
+              <button class="size-btn {% if loop.first %}active{% endif %}"
+                      onclick="selectSize({{ p.id }}, this, '{{ size }}')">{{ size }}</button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="product-footer">
+            <div class="product-price" id="price-{{ p.id }}">AED {{ "%.2f"|format(p.price) }}</div>
+            <button class="btn-add" onclick="addToCart({{ p.id }}, this)">🛒 Order Cake</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+const cakePrices = {
+  {% for p in products %}
+  {{ p.id }}: { base: {{ p.price }}, sizes: ["{{ p.sizes|join('","') }}"] },
+  {% endfor %}
+};
+function selectSize(id, btn, size) {
+  document.querySelectorAll(`#sizes-${id} .size-btn`).forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  // Price tiers +0, +20, +45 for 6/8/10 inch
+  const idx = parseInt(btn.dataset.idx || btn.closest(".size-btns").querySelectorAll(".size-btn").length - Array.from(btn.closest(".size-btns").querySelectorAll(".size-btn")).indexOf(btn) - 1);
+  const base = cakePrices[id].base;
+  const additions = [0, 20, 45];
+  const sizeIndex = Array.from(btn.closest(".size-btns").querySelectorAll(".size-btn")).indexOf(btn);
+  const newPrice = (base + additions[sizeIndex]).toFixed(2);
+  document.getElementById(`price-${id}`).textContent = `AED ${newPrice}`;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Scoops & Smiles — Dubai's Sweetest Ice Cream Shop{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bubbles">
+    <div class="bubble b1"></div><div class="bubble b2"></div>
+    <div class="bubble b3"></div><div class="bubble b4"></div>
+    <div class="bubble b5"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">🌟 Dubai's #1 Ice Cream Shop</div>
+    <h1 class="hero-title">Life is better<br>with <span class="hero-highlight">Ice Cream</span></h1>
+    <p class="hero-para">Over 100 flavours across 7 categories. Cones, cups, cakes, popsicles and more — delivered fresh to your door.</p>
+    <div class="hero-btns">
+      <a href="{{ url_for('cones') }}" class="btn-primary">🍦 Order Now</a>
+      <a href="{{ url_for('cakes') }}" class="btn-outline">🎂 Ice Cream Cakes</a>
+    </div>
+    <div class="hero-pills">
+      <span>🚚 Free delivery over AED 80</span>
+      <span>⚡ 45 min delivery</span>
+      <span>🥛 Fresh daily</span>
+    </div>
+  </div>
+  <div class="hero-img-col">
+    <div class="hero-img-wrap">
+      <img src="https://images.pexels.com/photos/1362534/pexels-photo-1362534.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Ice Cream" class="hero-img">
+      <div class="hero-float-tag">
+        <span class="hft-emoji">🍦</span>
+        <div><strong>Today's Special</strong><br><small>Mango Swirl Cone · AED 14</small></div>
+      </div>
+      <div class="hero-float-tag t2">
+        <span class="hft-emoji">⭐</span>
+        <div><strong>4.9 Rating</strong><br><small>2,400+ happy customers</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROMO BANNER -->
+<div class="promo-strip">
+  <div class="promo-inner">
+    <div class="promo-item">🎉 <strong>Summer Special:</strong> Buy 3 cones, get 1 FREE!</div>
+    <div class="promo-divider">|</div>
+    <div class="promo-item">🎂 <strong>Custom Cakes:</strong> Order 24h in advance</div>
+    <div class="promo-divider">|</div>
+    <div class="promo-item">🚚 <strong>Free delivery</strong> on orders over AED 80</div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-hd">
+      <h2 class="section-title">Our Categories</h2>
+      <p class="section-sub">7 delicious categories — something for everyone</p>
+    </div>
+    <div class="cat-cards-grid">
+      <a href="{{ url_for('cones') }}" class="cat-big-card" style="--bg:#FFF0E0">
+        <div class="cbc-emoji">🍦</div>
+        <div class="cbc-name">Cone Ice Creams</div>
+        <div class="cbc-count">16 flavours</div>
+      </a>
+      <a href="{{ url_for('cups') }}" class="cat-big-card" style="--bg:#E8F0FF">
+        <div class="cbc-emoji">🍨</div>
+        <div class="cbc-name">Cup Ice Creams</div>
+        <div class="cbc-count">15 flavours</div>
+      </a>
+      <a href="{{ url_for('cakes') }}" class="cat-big-card" style="--bg:#FFE8F0">
+        <div class="cbc-emoji">🎂</div>
+        <div class="cbc-name">Ice Cream Cakes</div>
+        <div class="cbc-count">15 designs</div>
+      </a>
+      <a href="{{ url_for('fruit_shaped') }}" class="cat-big-card" style="--bg:#E8FFE8">
+        <div class="cbc-emoji">🍉</div>
+        <div class="cbc-name">Fruit Shaped</div>
+        <div class="cbc-count">15 shapes</div>
+      </a>
+      <a href="{{ url_for('popsicles') }}" class="cat-big-card" style="--bg:#FFF8E0">
+        <div class="cbc-emoji">🍡</div>
+        <div class="cbc-name">Popsicles & Bars</div>
+        <div class="cbc-count">15 bars</div>
+      </a>
+      <a href="{{ url_for('sundaes') }}" class="cat-big-card" style="--bg:#F0E8FF">
+        <div class="cbc-emoji">🍧</div>
+        <div class="cbc-name">Sundaes</div>
+        <div class="cbc-count">15 creations</div>
+      </a>
+      <a href="{{ url_for('specials') }}" class="cat-big-card" style="--bg:#E8FFF8">
+        <div class="cbc-emoji">✨</div>
+        <div class="cbc-name">Specials</div>
+        <div class="cbc-count">16 unique treats</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="section section-pink">
+  <div class="section-inner">
+    <div class="section-hd">
+      <h2 class="section-title">Fan Favourites</h2>
+      <p class="section-sub">Our most-loved creations this season</p>
+    </div>
+    <div class="products-grid">
+      {% for p in featured %}
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="{{ p.img }}" alt="{{ p.name }}" class="product-img" onerror="this.parentElement.innerHTML='<div class=product-img-fb>🍦</div>'">
+        </div>
+        <div class="product-body">
+          <div class="product-name">{{ p.name }}</div>
+          <div class="product-desc">{{ p.desc[:70] }}…</div>
+          <div class="product-footer">
+            <div class="product-price">AED {{ "%.2f"|format(p.price) }}</div>
+            <button class="btn-add" onclick="addToCart({{ p.id }}, this)">+ Add</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why-us">
+  <div class="section-inner">
+    <div class="why-grid">
+      <div class="why-item"><div class="why-icon">🥛</div><strong>Premium Ingredients</strong><br><span>Real cream, real fruit, no artificial flavours</span></div>
+      <div class="why-item"><div class="why-icon">🚚</div><strong>Fast Delivery</strong><br><span>45-minute delivery across Dubai</span></div>
+      <div class="why-item"><div class="why-icon">🌡️</div><strong>Cold Chain</strong><br><span>Delivered in insulated packaging</span></div>
+      <div class="why-item"><div class="why-icon">🎂</div><strong>Custom Cakes</strong><br><span>Personalised for any occasion</span></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

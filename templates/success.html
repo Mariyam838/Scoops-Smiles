@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed! — Scoops & Smiles{% endblock %}
+{% block content %}
+
+<div class="success-page">
+  <div class="success-card">
+    <div class="success-animation">
+      <div class="success-cone">🍦</div>
+      <div class="success-rings">
+        <div class="sring r1"></div>
+        <div class="sring r2"></div>
+        <div class="sring r3"></div>
+      </div>
+    </div>
+    <h1 class="success-title">Order Confirmed! 🎉</h1>
+    <p class="success-sub">
+      {% if order.name %}Hey {{ order.name }}, {% endif %}your ice cream is being scooped fresh right now!
+    </p>
+    <div class="success-details">
+      {% if order.total %}
+      <div class="success-row"><span>Total Paid</span><span class="success-val">AED {{ "%.2f"|format(order.total) }}</span></div>
+      {% endif %}
+      {% if order.items_count %}
+      <div class="success-row"><span>Items Ordered</span><span class="success-val">{{ order.items_count }}</span></div>
+      {% endif %}
+      <div class="success-row"><span>Estimated Delivery</span><span class="success-val eta-val">🚚 40–50 minutes</span></div>
+    </div>
+    <div class="success-note">
+      <span>🌡️</span>
+      <p>Your ice cream is packed in insulated packaging to keep it perfectly frozen. Our driver will contact you before arrival.</p>
+    </div>
+    <div class="success-actions">
+      <a href="{{ url_for('home') }}" class="btn-primary">🍦 Order More</a>
+      <a href="{{ url_for('cakes') }}" class="btn-outline">🎂 Browse Cakes</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.success-cone { font-size:64px; animation:coneWobble 1s cubic-bezier(.36,.07,.19,.97) infinite; }
+@keyframes coneWobble { 0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)} }
+.sring { position:absolute;border-radius:50%;border:2px solid;animation:ringExp 1.5s ease-out infinite; }
+.r1{width:80px;height:80px;top:50%;left:50%;margin:-40px 0 0 -40px;border-color:rgba(255,182,193,.6);animation-delay:0s}
+.r2{width:120px;height:120px;top:50%;left:50%;margin:-60px 0 0 -60px;border-color:rgba(255,182,193,.3);animation-delay:.3s}
+.r3{width:160px;height:160px;top:50%;left:50%;margin:-80px 0 0 -80px;border-color:rgba(255,182,193,.15);animation-delay:.6s}
+@keyframes ringExp{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.5);opacity:0}}
+</style>
+<script>
+(function(){
+  const colors=["#FF6B9D","#FFD93D","#6BCB77","#4D96FF","#FF6B6B","#C77DFF"];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const el=document.createElement("div");
+      const s=Math.random()*10+4,c=Math.random()>.5;
+      el.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:0;width:${s}px;height:${c?s:s*.4}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${c?"50%":"3px"};animation:fall ${1.5+Math.random()*2}s linear forwards;z-index:9999;pointer-events:none`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3500);
+    },i*25);
+  }
+  const st=document.createElement("style");
+  st.textContent="@keyframes fall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}";
+  document.head.appendChild(st);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Scoops & Smiles — Ice Cream Shop{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Poppins:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+  /* ══════════════════════════════════════════
+     SCOOPS & SMILES — SPLASH SCREEN STYLES
+  ══════════════════════════════════════════ */
+  :root {
+    --sp-pink:      #E8729A;
+    --sp-pink-light:#F0B0C8;
+    --sp-cream:     #FFF8F2;
+    --sp-dark:      #1A0810;
+    --sp-mid:       #3D1828;
+  }
+
+  /* ══ SPLASH SHELL ══ */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sp-dark);
+    transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #splash.sp-exit {
+    opacity: 0; transform: scale(1.04); pointer-events: none;
+  }
+
+  /* ── Background photo ── */
+  .sp-bg-photo {
+    position: absolute; inset: 0;
+    background-image: url('https://images.pexels.com/photos/1362534/pexels-photo-1362534.jpeg?auto=compress&cs=tinysrgb&w=1600');
+    background-size: cover; background-position: center 35%;
+    opacity: 0;
+    animation: spBgReveal 2.4s cubic-bezier(0.16,1,0.3,1) 0.3s forwards;
+  }
+  @keyframes spBgReveal { to { opacity: 0.2; } }
+
+  /* ── Vignette ── */
+  .sp-vignette {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 50%,
+        rgba(26,8,16,0) 0%, rgba(26,8,16,0.6) 60%, rgba(8,2,6,0.94) 100%),
+      linear-gradient(180deg, rgba(8,2,6,0.65) 0%, rgba(26,8,16,0.3) 50%, rgba(8,2,6,0.75) 100%);
+  }
+
+  /* ── Grain overlay ── */
+  .sp-grain {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px; mix-blend-mode: overlay;
+  }
+
+  /* ── Soft pink centre glow ── */
+  .sp-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 55% at 50% 48%,
+      rgba(232,114,154,0.13) 0%, rgba(240,176,200,0.06) 40%, transparent 70%);
+  }
+
+  /* ── Corner flourishes ── */
+  .sp-corner {
+    position: absolute; width: 120px; height: 120px;
+    opacity: 0; animation: spFadeIn 1s ease 1.4s forwards;
+  }
+  .sp-corner svg { width: 100%; height: 100%; }
+  .sp-corner.tl { top: 32px; left: 32px; }
+  .sp-corner.tr { top: 32px; right: 32px; transform: scaleX(-1); }
+  .sp-corner.bl { bottom: 32px; left: 32px; transform: scaleY(-1); }
+  .sp-corner.br { bottom: 32px; right: 32px; transform: scale(-1); }
+
+  /* ── Horizontal pink rules ── */
+  .sp-rule {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(232,114,154,0.5), rgba(232,114,154,0.75), rgba(232,114,154,0.5), transparent);
+    opacity: 0; animation: spRuleReveal 1.2s ease forwards;
+  }
+  .sp-rule.top    { top: 72px;    width: 0; animation-delay: 1.2s; }
+  .sp-rule.bottom { bottom: 72px; width: 0; animation-delay: 1.3s; }
+  @keyframes spRuleReveal {
+    from { width: 0; opacity: 0; }
+    to   { width: min(640px, 72vw); opacity: 1; }
+  }
+
+  /* ── Loading bar ── */
+  .sp-loader {
+    position: absolute; bottom: 0; left: 0;
+    height: 2px; width: 0;
+    background: linear-gradient(to right, #c8305a, var(--sp-pink), var(--sp-pink-light));
+    animation: spLoaderFill 1.8s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
+    box-shadow: 0 0 12px rgba(232,114,154,0.5);
+  }
+  @keyframes spLoaderFill { to { width: 100%; } }
+
+  /* ── Centre content ── */
+  .sp-content {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    padding: 0 24px; gap: 0;
+  }
+
+  /* ── Emblem ── */
+  .sp-emblem {
+    width: 118px; height: 118px; margin-bottom: 32px;
+    opacity: 0; transform: scale(0.82) translateY(12px);
+    animation: spEmblemIn 1s cubic-bezier(0.16,1,0.3,1) 0.5s forwards;
+  }
+  @keyframes spEmblemIn { to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  /* ── Eyebrow ── */
+  .sp-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(11px,1.6vw,13px); font-weight: 300;
+    letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--sp-pink-light); opacity: 0;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+    animation: spSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s forwards;
+  }
+  .sp-eyebrow::before, .sp-eyebrow::after {
+    content: ''; display: block; width: 36px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--sp-pink)); opacity: 0.7;
+  }
+  .sp-eyebrow::after { background: linear-gradient(to left, transparent, var(--sp-pink)); }
+
+  /* ── Wordmark ── */
+  .sp-wordmark {
+    opacity: 0;
+    animation: spSlideUp 0.9s cubic-bezier(0.16,1,0.3,1) 1.0s forwards;
+    margin-bottom: 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .sp-wm-line1 {
+    display: flex; align-items: center; gap: 14px; line-height: 1;
+  }
+  .sp-wm-script {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(3rem,8vw,5.2rem);
+    color: var(--sp-cream); line-height: 1;
+    text-shadow: 0 4px 24px rgba(26,8,16,0.5);
+  }
+  /* SVG ice cream emblem inline */
+  .sp-wm-cone { width: clamp(36px,5.5vw,54px); height: auto; flex-shrink: 0; margin-top: -4px; }
+  .sp-wm-line2 {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+  }
+  .sp-wm-rule { flex: 1; height: 1px; background: rgba(232,114,154,0.65); display: block; min-width: 30px; }
+  .sp-wm-sub {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(0.52rem,1.2vw,0.68rem); font-weight: 500;
+    letter-spacing: 0.32em; color: var(--sp-pink-light); white-space: nowrap;
+  }
+
+  /* ── Subtitle ── */
+  .sp-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(14px,2.2vw,18px); font-style: italic; font-weight: 300;
+    color: rgba(255,248,242,0.52); letter-spacing: 0.06em;
+    margin-top: 20px; margin-bottom: 48px;
+    opacity: 0; animation: spSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.18s forwards;
+  }
+
+  /* ── Divider ── */
+  .sp-divider {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 48px;
+    opacity: 0; animation: spFadeIn 0.8s ease 1.3s forwards;
+  }
+  .sp-div-line {
+    width: 60px; height: 1px;
+    background: linear-gradient(to right, transparent, rgba(232,114,154,0.7));
+  }
+  .sp-div-line.r { background: linear-gradient(to left, transparent, rgba(232,114,154,0.7)); }
+  .sp-div-diamond { width: 6px; height: 6px; background: var(--sp-pink); transform: rotate(45deg); opacity: 0.9; }
+  .sp-div-dot     { width: 3px; height: 3px; background: var(--sp-pink); border-radius: 50%; opacity: 0.5; }
+
+  /* ── Enter button ── */
+  .sp-enter {
+    position: relative; font-family: 'Poppins', sans-serif;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase;
+    color: #1A0810;
+    background: linear-gradient(135deg, var(--sp-pink-light) 0%, var(--sp-pink) 60%, #c8305a 100%);
+    border: none; padding: 16px 52px; cursor: pointer; overflow: hidden;
+    opacity: 0; transform: translateY(10px);
+    animation: spSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.45s forwards;
+    box-shadow: 0 8px 32px rgba(232,114,154,0.38), 0 2px 8px rgba(26,8,16,0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .sp-enter::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 60%);
+    pointer-events: none;
+  }
+  .sp-enter::after {
+    content: ''; position: absolute; top: -50%; left: -60%;
+    width: 40%; height: 200%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg); animation: spShimmer 3.5s ease 2.2s infinite;
+  }
+  @keyframes spShimmer { 0% { left: -60%; } 100% { left: 160%; } }
+  .sp-enter:hover  { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(232,114,154,0.5), 0 4px 12px rgba(26,8,16,0.3); }
+  .sp-enter:active { transform: translateY(0); }
+
+  /* ── Since badge (bottom-right) ── */
+  .sp-since {
+    position: absolute; bottom: 44px; right: 56px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    opacity: 0; animation: spFadeIn 1s ease 1.6s forwards;
+  }
+  .sp-since-year {
+    font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 900;
+    font-style: italic; line-height: 1; color: rgba(232,114,154,0.16); letter-spacing: -0.02em;
+  }
+  .sp-since-label {
+    font-family: 'Cormorant Garamond', serif; font-size: 9px;
+    letter-spacing: 0.35em; text-transform: uppercase; color: rgba(232,114,154,0.32); margin-top: -4px;
+  }
+
+  /* ── Location tag (bottom-left) ── */
+  .sp-loc {
+    position: absolute; bottom: 44px; left: 56px;
+    opacity: 0; animation: spFadeIn 1s ease 1.6s forwards;
+  }
+  .sp-loc-inner {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Cormorant Garamond', serif; font-size: 11px;
+    font-style: italic; letter-spacing: 0.1em; color: rgba(232,114,154,0.42);
+  }
+  .sp-loc-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--sp-pink); opacity: 0.55;
+    animation: spLocPulse 2s ease-in-out infinite;
+  }
+  @keyframes spLocPulse {
+    0%,100% { opacity: 0.55; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.3); }
+  }
+
+  /* ── Shared animations ── */
+  @keyframes spFadeIn  { to { opacity: 1; } }
+  @keyframes spSlideUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .sp-corner { width: 72px; height: 72px; }
+    .sp-corner.tl, .sp-corner.tr { top: 20px; }
+    .sp-corner.tl, .sp-corner.bl { left: 20px; }
+    .sp-corner.tr, .sp-corner.br { right: 20px; }
+    .sp-corner.bl, .sp-corner.br { bottom: 20px; }
+    .sp-rule.top    { top: 48px; }
+    .sp-rule.bottom { bottom: 48px; }
+    .sp-since, .sp-loc { display: none; }
+    .sp-enter { padding: 15px 38px; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     SPLASH SCREEN
+═════════════════════════════════════════════ -->
+<div id="splash">
+
+  <div class="sp-bg-photo"></div>
+  <div class="sp-vignette"></div>
+  <div class="sp-grain"></div>
+  <div class="sp-glow"></div>
+  <div class="sp-loader"></div>
+
+  <div class="sp-rule top"></div>
+  <div class="sp-rule bottom"></div>
+
+  <!-- Corner flourishes — ice cream motif (cone + drip curves) -->
+  <div class="sp-corner tl">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="8" y1="8" x2="60" y2="8" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="8" x2="8" y2="60" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="14" x2="40" y2="14" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="14" y1="8" x2="14" y2="40" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <!-- mini scoop -->
+      <circle cx="32" cy="52" r="12" fill="#E8729A" opacity="0.22"/>
+      <circle cx="32" cy="52" r="12" fill="none" stroke="#E8729A" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="28" cy="49" r="3" fill="#E8729A" opacity="0.18"/>
+      <!-- drip curve -->
+      <path d="M26 64 Q24 72 26 80" stroke="#E8729A" stroke-width="1.2" stroke-linecap="round" opacity="0.45" fill="none"/>
+      <path d="M38 64 Q40 70 38 76" stroke="#E8729A" stroke-width="1.0" stroke-linecap="round" opacity="0.3" fill="none"/>
+      <!-- cone lines -->
+      <path d="M24 64 L32 88 L40 64" stroke="#E8729A" stroke-width="1.0" opacity="0.35" fill="none"/>
+      <line x1="32" y1="88" x2="26" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <line x1="32" y1="88" x2="38" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="56" cy="24" r="1.5" fill="#E8729A" opacity="0.3"/>
+      <circle cx="46" cy="22" r="1" fill="#E8729A" opacity="0.25"/>
+    </svg>
+  </div>
+  <div class="sp-corner tr">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="8" y1="8" x2="60" y2="8" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="8" x2="8" y2="60" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="14" x2="40" y2="14" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="14" y1="8" x2="14" y2="40" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="32" cy="52" r="12" fill="#E8729A" opacity="0.22"/>
+      <circle cx="32" cy="52" r="12" fill="none" stroke="#E8729A" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="28" cy="49" r="3" fill="#E8729A" opacity="0.18"/>
+      <path d="M26 64 Q24 72 26 80" stroke="#E8729A" stroke-width="1.2" stroke-linecap="round" opacity="0.45" fill="none"/>
+      <path d="M38 64 Q40 70 38 76" stroke="#E8729A" stroke-width="1.0" stroke-linecap="round" opacity="0.3" fill="none"/>
+      <path d="M24 64 L32 88 L40 64" stroke="#E8729A" stroke-width="1.0" opacity="0.35" fill="none"/>
+      <line x1="32" y1="88" x2="26" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <line x1="32" y1="88" x2="38" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="56" cy="24" r="1.5" fill="#E8729A" opacity="0.3"/>
+      <circle cx="46" cy="22" r="1" fill="#E8729A" opacity="0.25"/>
+    </svg>
+  </div>
+  <div class="sp-corner bl">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="8" y1="8" x2="60" y2="8" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="8" x2="8" y2="60" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="14" x2="40" y2="14" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="14" y1="8" x2="14" y2="40" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="32" cy="52" r="12" fill="#E8729A" opacity="0.22"/>
+      <circle cx="32" cy="52" r="12" fill="none" stroke="#E8729A" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="28" cy="49" r="3" fill="#E8729A" opacity="0.18"/>
+      <path d="M26 64 Q24 72 26 80" stroke="#E8729A" stroke-width="1.2" stroke-linecap="round" opacity="0.45" fill="none"/>
+      <path d="M38 64 Q40 70 38 76" stroke="#E8729A" stroke-width="1.0" stroke-linecap="round" opacity="0.3" fill="none"/>
+      <path d="M24 64 L32 88 L40 64" stroke="#E8729A" stroke-width="1.0" opacity="0.35" fill="none"/>
+      <line x1="32" y1="88" x2="26" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <line x1="32" y1="88" x2="38" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="56" cy="24" r="1.5" fill="#E8729A" opacity="0.3"/>
+      <circle cx="46" cy="22" r="1" fill="#E8729A" opacity="0.25"/>
+    </svg>
+  </div>
+  <div class="sp-corner br">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="8" y1="8" x2="60" y2="8" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="8" x2="8" y2="60" stroke="#E8729A" stroke-width="0.8" opacity="0.6"/>
+      <line x1="8" y1="14" x2="40" y2="14" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <line x1="14" y1="8" x2="14" y2="40" stroke="#E8729A" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="32" cy="52" r="12" fill="#E8729A" opacity="0.22"/>
+      <circle cx="32" cy="52" r="12" fill="none" stroke="#E8729A" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="28" cy="49" r="3" fill="#E8729A" opacity="0.18"/>
+      <path d="M26 64 Q24 72 26 80" stroke="#E8729A" stroke-width="1.2" stroke-linecap="round" opacity="0.45" fill="none"/>
+      <path d="M38 64 Q40 70 38 76" stroke="#E8729A" stroke-width="1.0" stroke-linecap="round" opacity="0.3" fill="none"/>
+      <path d="M24 64 L32 88 L40 64" stroke="#E8729A" stroke-width="1.0" opacity="0.35" fill="none"/>
+      <line x1="32" y1="88" x2="26" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <line x1="32" y1="88" x2="38" y2="68" stroke="#E8729A" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="56" cy="24" r="1.5" fill="#E8729A" opacity="0.3"/>
+      <circle cx="46" cy="22" r="1" fill="#E8729A" opacity="0.25"/>
+    </svg>
+  </div>
+
+  <!-- Est. badge -->
+  <div class="sp-since">
+    <span class="sp-since-year">2018</span>
+    <span class="sp-since-label">Est. Dubai, UAE</span>
+  </div>
+
+  <!-- Location tag -->
+  <div class="sp-loc">
+    <div class="sp-loc-inner">
+      <span class="sp-loc-dot"></span>
+      Old Town, Dubai
+    </div>
+  </div>
+
+  <!-- Centre content -->
+  <div class="sp-content">
+
+    <!-- Circular emblem -->
+    <svg class="sp-emblem" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="56" stroke="#E8729A" stroke-width="0.6" opacity="0.45" stroke-dasharray="4 3"/>
+      <circle cx="60" cy="60" r="50" stroke="#E8729A" stroke-width="1.2" opacity="0.85"/>
+      <circle cx="60" cy="60" r="44" stroke="#E8729A" stroke-width="0.6" opacity="0.4"/>
+      <circle cx="60" cy="60" r="43" fill="rgba(26,8,16,0.6)"/>
+
+      <!-- Left scoop sprig -->
+      <path d="M46 82 Q44 70 46 60" stroke="#E8729A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+      <circle cx="43" cy="56" r="5" fill="#E8729A" opacity="0.28"/>
+      <circle cx="48" cy="51" r="5" fill="#E8729A" opacity="0.28"/>
+      <circle cx="45" cy="46" r="4.5" fill="#E8729A" opacity="0.35"/>
+
+      <!-- Right scoop sprig -->
+      <path d="M74 82 Q76 70 74 60" stroke="#E8729A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.55"/>
+      <circle cx="77" cy="56" r="5" fill="#E8729A" opacity="0.28"/>
+      <circle cx="72" cy="51" r="5" fill="#E8729A" opacity="0.28"/>
+      <circle cx="75" cy="46" r="4.5" fill="#E8729A" opacity="0.35"/>
+
+      <!-- Arc text -->
+      <path id="arcT" d="M 14 60 A 46 46 0 0 1 106 60" fill="none"/>
+      <path id="arcB" d="M 18 68 A 42 42 0 0 0 102 68" fill="none"/>
+      <text font-family="Cormorant Garamond, serif" font-size="7.2" fill="#F0B0C8" opacity="0.9" letter-spacing="0.18em">
+        <textPath href="#arcT" startOffset="50%" text-anchor="middle" letter-spacing="5">SCOOPS &amp; SMILES</textPath>
+      </text>
+      <text font-family="Cormorant Garamond, serif" font-size="5.5" fill="#F0B0C8" opacity="0.6">
+        <textPath href="#arcB" startOffset="50%" text-anchor="middle" letter-spacing="4">ARTISAN ICE CREAM</textPath>
+      </text>
+
+      <!-- Cardinal dots -->
+      <circle cx="60" cy="14" r="2.2" fill="#E8729A" opacity="0.7"/>
+      <circle cx="60" cy="106" r="2.2" fill="#E8729A" opacity="0.7"/>
+      <circle cx="14" cy="60" r="1.6" fill="#E8729A" opacity="0.5"/>
+      <circle cx="106" cy="60" r="1.6" fill="#E8729A" opacity="0.5"/>
+
+      <!-- Centre cone illustration -->
+      <!-- Scoop -->
+      <circle cx="60" cy="52" r="13" fill="#FFF8F2" opacity="0.92"/>
+      <circle cx="56" cy="48" r="4" fill="white" opacity="0.3"/>
+      <!-- Drip -->
+      <path d="M52 65 Q50 70 52 74" stroke="#E8729A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.7"/>
+      <path d="M68 65 Q70 68 68 72" stroke="#E8729A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <!-- Cone -->
+      <polygon points="60,80 50,65 70,65" fill="#C07838" opacity="0.85"/>
+      <line x1="60" y1="80" x2="53" y2="67" stroke="rgba(160,80,20,.3)" stroke-width="0.8"/>
+      <line x1="60" y1="80" x2="67" y2="67" stroke="rgba(160,80,20,.3)" stroke-width="0.8"/>
+      <!-- Cherry -->
+      <circle cx="63" cy="41" r="3.5" fill="#E83050" opacity="0.9"/>
+      <path d="M63 37 Q65 33 67 35" stroke="#5a9a30" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+      <!-- Diamond accent -->
+      <path d="M60 65 L61.4 67.5 L60 70 L58.6 67.5 Z" fill="#E8729A" opacity="0.75"/>
+    </svg>
+
+    <p class="sp-eyebrow">Artisan Ice Cream</p>
+
+    <!-- Wordmark -->
+    <div class="sp-wordmark">
+      <div class="sp-wm-line1">
+        <span class="sp-wm-script">Scoops</span>
+        <!-- Inline cone SVG matching the bakery macaron -->
+        <svg class="sp-wm-cone" viewBox="0 0 44 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Scoop -->
+          <circle cx="22" cy="18" r="16" fill="#FFB8C8"/>
+          <circle cx="16" cy="13" r="6" fill="white" opacity="0.22"/>
+          <!-- Sauce drip -->
+          <path d="M13 34 Q11 40 13 46" stroke="#E8729A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M31 34 Q33 38 31 43" stroke="#E8729A" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <!-- Cone -->
+          <polygon points="22,54 8,34 36,34" fill="#C07838"/>
+          <line x1="22" y1="54" x2="13" y2="36" stroke="rgba(160,80,20,.25)" stroke-width="1.5"/>
+          <line x1="22" y1="54" x2="31" y2="36" stroke="rgba(160,80,20,.25)" stroke-width="1.5"/>
+          <rect x="8" y="31" width="28" height="6" rx="3" fill="#D08848"/>
+          <!-- Cherry -->
+          <circle cx="25" cy="5" r="4" fill="#E83050"/>
+          <path d="M25 1 Q28 -3 30 0" stroke="#5a9a30" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="sp-wm-script">&amp; Smiles</span>
+      </div>
+      <div class="sp-wm-line2">
+        <span class="sp-wm-rule"></span>
+        <span class="sp-wm-sub">ICE CREAM SHOP</span>
+        <span class="sp-wm-rule"></span>
+      </div>
+    </div>
+
+    <p class="sp-subtitle">
+      Handcrafted with love &nbsp;·&nbsp; Fresh every day &nbsp;·&nbsp; 100+ flavours
+    </p>
+
+    <div class="sp-divider">
+      <div class="sp-div-line"></div>
+      <div class="sp-div-dot"></div>
+      <div class="sp-div-diamond"></div>
+      <div class="sp-div-dot"></div>
+      <div class="sp-div-line r"></div>
+    </div>
+
+    <button class="sp-enter" onclick="enterShop()">Start Scooping</button>
+
+  </div>
+</div>
+<!-- END SPLASH -->
+
+<script>
+function enterShop() {
+  document.body.style.overflow = '';
+  var s = document.getElementById('splash');
+  s.classList.add('sp-exit');
+  // Wait for the CSS transition (0.9s) to finish before hiding the element
+  setTimeout(function() { s.style.display = 'none'; }, 950);
+}
+
+// Allow keyboard users to skip with Enter, Space, or Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') enterShop();
+});
+
+// Always lock scroll when the page loads so the splash screen is the focus
+document.body.style.overflow = 'hidden';
+
+// Allow clicking the background to enter the shop
+document.getElementById('splash').addEventListener('click', function(e) {
+  if (e.target === this) enterShop();
+});
+</script>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="{{ url_for('home') }}" class="nav-logo">
+      <span class="logo-icon">🍦</span>
+      <span class="logo-text">Scoops & Smiles</span>
+    </a>
+    <div class="nav-links">
+      <a href="{{ url_for('home') }}"         class="nav-link {% if request.endpoint=='home' %}active{% endif %}">Home</a>
+      <a href="{{ url_for('cones') }}"        class="nav-link {% if request.endpoint=='cones' %}active{% endif %}">🍦 Cones</a>
+      <a href="{{ url_for('cups') }}"         class="nav-link {% if request.endpoint=='cups' %}active{% endif %}">🍨 Cups</a>
+      <a href="{{ url_for('cakes') }}"        class="nav-link {% if request.endpoint=='cakes' %}active{% endif %}">🎂 Cakes</a>
+      <a href="{{ url_for('fruit_shaped') }}" class="nav-link {% if request.endpoint=='fruit_shaped' %}active{% endif %}">🍉 Fruit</a>
+      <a href="{{ url_for('popsicles') }}"    class="nav-link {% if request.endpoint=='popsicles' %}active{% endif %}">🍡 Popsicles</a>
+      <a href="{{ url_for('sundaes') }}"      class="nav-link {% if request.endpoint=='sundaes' %}active{% endif %}">🍧 Sundaes</a>
+      <a href="{{ url_for('specials') }}"     class="nav-link {% if request.endpoint=='specials' %}active{% endif %}">✨ Specials</a>
+    </div>
+    <a href="{{ url_for('cart_page') }}" class="nav-cart">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      {% if cart_count > 0 %}<span class="cart-dot">{{ cart_count }}</span>{% endif %}
+    </a>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="{{ url_for('home') }}" class="mob-link">🏠 Home</a>
+    <a href="{{ url_for('cones') }}" class="mob-link">🍦 Cone Ice Creams</a>
+    <a href="{{ url_for('cups') }}" class="mob-link">🍨 Cup Ice Creams</a>
+    <a href="{{ url_for('cakes') }}" class="mob-link">🎂 Ice Cream Cakes</a>
+    <a href="{{ url_for('fruit_shaped') }}" class="mob-link">🍉 Fruit Shaped</a>
+    <a href="{{ url_for('popsicles') }}" class="mob-link">🍡 Popsicles</a>
+    <a href="{{ url_for('sundaes') }}" class="mob-link">🍧 Sundaes</a>
+    <a href="{{ url_for('specials') }}" class="mob-link">✨ Specials</a>
+    <a href="{{ url_for('cart_page') }}" class="mob-link">🛒 Cart</a>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="logo-icon">🍦</span>
+        <span class="logo-text">Scoops & Smiles</span>
+      </div>
+      <div class="footer-cats">
+        <a href="{{ url_for('cones') }}">Cones</a>
+        <a href="{{ url_for('cups') }}">Cups</a>
+        <a href="{{ url_for('cakes') }}">Cakes</a>
+        <a href="{{ url_for('fruit_shaped') }}">Fruit Shaped</a>
+        <a href="{{ url_for('popsicles') }}">Popsicles</a>
+        <a href="{{ url_for('sundaes') }}">Sundaes</a>
+        <a href="{{ url_for('specials') }}">Specials</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Scoops & Smiles. Made with 🍦 and lots of love.</p>
+      <p class="footer-tagline">100+ flavours · Dubai, UAE · Delivery 7 days a week</p>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+function toggleMenu() {
+  document.getElementById("mobile-nav").classList.toggle("open");
+}
+</script>
+</body>
+</html>

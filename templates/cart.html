@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Your Cart — Scoops & Smiles{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-icon">🛒</div>
+    <div>
+      <h1 class="page-title">Your Cart</h1>
+      <p class="page-sub">{{ items|length }} item{% if items|length != 1 %}s{% endif %} in your order</p>
+    </div>
+  </div>
+</div>
+
+<div class="cart-layout">
+  <div class="cart-main">
+    {% if items %}
+      {% for item in items %}
+      <div class="cart-row" id="row-{{ item.product.id }}">
+        <div class="cart-img-wrap">
+          <img src="{{ item.product.img }}" alt="{{ item.product.name }}" class="cart-img"
+               onerror="this.style.background='#FFF0E0'">
+        </div>
+        <div class="cart-info">
+          <div class="cart-name">{{ item.product.name }}</div>
+          <div class="cart-unit">AED {{ "%.2f"|format(item.product.price) }} each</div>
+        </div>
+        <div class="cart-controls">
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="updateQty({{ item.product.id }}, {{ item.qty - 1 }})">−</button>
+            <span class="qty-num">{{ item.qty }}</span>
+            <button class="qty-btn" onclick="updateQty({{ item.product.id }}, {{ item.qty + 1 }})">+</button>
+          </div>
+          <div class="cart-line-total">AED {{ "%.2f"|format(item.line_total) }}</div>
+          <button class="remove-btn" onclick="removeItem({{ item.product.id }})">🗑️</button>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🍦</div>
+      <div class="empty-title">Your cart is empty!</div>
+      <p class="empty-sub">Add some delicious ice cream to get started</p>
+      <a href="{{ url_for('cones') }}" class="btn-primary">Browse Ice Creams</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if items %}
+  <aside class="cart-summary">
+    <div class="summary-card">
+      <div class="summary-title">🍦 Order Summary</div>
+      <div class="summary-row"><span>Subtotal</span><span>AED {{ "%.2f"|format(subtotal) }}</span></div>
+      <div class="summary-row"><span>Delivery</span><span>AED {{ "%.2f"|format(delivery) }}</span></div>
+      <div class="summary-row total-row"><span>Total</span><span>AED {{ "%.2f"|format(total) }}</span></div>
+      <a href="{{ url_for('checkout') }}" class="btn-primary btn-full">Proceed to Checkout →</a>
+      <a href="{{ url_for('home') }}" class="btn-outline btn-full" style="margin-top:10px">Continue Shopping</a>
+    </div>
+    <div class="cart-promo-note">
+      🚚 Free delivery on orders over AED 80!
+      {% if total < 80 %}<br><small>Add AED {{ "%.2f"|format(80 - total) }} more for free delivery</small>{% endif %}
+    </div>
+  </aside>
+  {% endif %}
+</div>
+
+<script>
+async function updateQty(id, qty) {
+  await fetch("/api/cart/update", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id, qty}) });
+  location.reload();
+}
+async function removeItem(id) {
+  await fetch("/api/cart/remove", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id}) });
+  location.reload();
+}
+</script>
+{% endblock %}

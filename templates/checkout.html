@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Scoops & Smiles{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-icon">📋</div>
+    <div>
+      <h1 class="page-title">Checkout</h1>
+      <p class="page-sub">Almost there — confirm your sweet order!</p>
+    </div>
+  </div>
+</div>
+
+{% if not items %}
+<div class="section-inner" style="text-align:center;padding:80px 24px">
+  <div style="font-size:60px">🍦</div>
+  <div class="empty-title">Nothing to checkout!</div>
+  <a href="{{ url_for('cones') }}" class="btn-primary" style="margin-top:20px;display:inline-block">Browse Ice Creams</a>
+</div>
+{% else %}
+<div class="checkout-layout">
+  <div class="checkout-form-col">
+    <div class="checkout-card">
+      <div class="checkout-section-hd"><span class="step-badge">1</span> Delivery Details</div>
+      <form method="POST" action="{{ url_for('checkout') }}">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="name" class="form-input" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delivery Address *</label>
+          <textarea name="address" class="form-input form-textarea" placeholder="Building, street, area, city…" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Number *</label>
+          <input type="tel" name="phone" class="form-input" placeholder="+971 XX XXX XXXX" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Instructions (optional)</label>
+          <input type="text" name="notes" class="form-input" placeholder="Extra napkins, no nuts, etc…">
+        </div>
+
+        <div class="checkout-section-hd" style="margin-top:28px"><span class="step-badge">2</span> Order Summary</div>
+        <div class="checkout-items">
+          {% for item in items %}
+          <div class="checkout-item-row">
+            <img src="{{ item.product.img }}" alt="{{ item.product.name }}" class="checkout-item-img" onerror="this.style.background='#FFF0E0'">
+            <div class="checkout-item-info">
+              <div class="checkout-item-name">{{ item.product.name }}</div>
+              <div class="checkout-item-meta">Qty: {{ item.qty }} · AED {{ "%.2f"|format(item.product.price) }}</div>
+            </div>
+            <div class="checkout-item-total">AED {{ "%.2f"|format(item.line_total) }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="checkout-totals">
+          <div class="summary-row"><span>Subtotal</span><span>AED {{ "%.2f"|format(subtotal) }}</span></div>
+          <div class="summary-row"><span>Delivery</span><span>AED {{ "%.2f"|format(delivery) }}</span></div>
+          <div class="summary-row total-row"><span>Total</span><span>AED {{ "%.2f"|format(total) }}</span></div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full btn-confirm">
+          🍦 Confirm Order · AED {{ "%.2f"|format(total) }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <aside class="checkout-trust-col">
+    <div class="trust-card">
+      <div class="trust-title">Why order with us?</div>
+      <div class="trust-item">🚚<div><strong>45-Min Delivery</strong><br><small>Fresh and cold, guaranteed</small></div></div>
+      <div class="trust-item">🌡️<div><strong>Insulated Packaging</strong><br><small>Arrives perfectly cold</small></div></div>
+      <div class="trust-item">🥛<div><strong>Premium Ingredients</strong><br><small>Real cream, real fruit</small></div></div>
+      <div class="trust-item">😊<div><strong>Happiness Guarantee</strong><br><small>Not happy? We fix it free</small></div></div>
+    </div>
+  </aside>
+</div>
+{% endif %}
+
+{% endblock %}

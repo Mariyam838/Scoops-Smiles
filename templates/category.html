@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Scoops & Smiles{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-icon">{{ icon }}</div>
+    <div>
+      <h1 class="page-title">{{ title }}</h1>
+      <p class="page-sub">{{ products|length }} delicious choices</p>
+    </div>
+  </div>
+</div>
+
+<div class="cat-page-wrap">
+  <div class="section-inner">
+    <div class="products-grid products-grid-lg">
+      {% for p in products %}
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="{{ p.img }}" alt="{{ p.name }}" class="product-img"
+               onerror="this.parentElement.innerHTML='<div class=product-img-fb>🍦</div>'">
+          <div class="product-price-badge">AED {{ "%.2f"|format(p.price) }}</div>
+        </div>
+        <div class="product-body">
+          <div class="product-name">{{ p.name }}</div>
+          <div class="product-desc">{{ p.desc }}</div>
+          <div class="product-footer">
+            <div class="product-price">AED {{ "%.2f"|format(p.price) }}</div>
+            <button class="btn-add" onclick="addToCart({{ p.id }}, this)">🛒 Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
